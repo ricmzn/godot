@@ -56,6 +56,7 @@ Dictionary GDScriptSyntaxHighlighter::_get_line_syntax_highlighting_impl(int p_l
 	bool in_raw_string = false;
 	bool in_node_path = false;
 	bool in_node_ref = false;
+	bool in_unique_node_ref = false;
 	bool in_annotation = false;
 	bool in_string_name = false;
 	bool is_hex_notation = false;
@@ -187,6 +188,9 @@ Dictionary GDScriptSyntaxHighlighter::_get_line_syntax_highlighting_impl(int p_l
 					}
 					if (in_node_ref && color_regions[in_region].type == ColorRegion::TYPE_STRING) {
 						region_color = node_ref_color;
+					}
+					if (in_unique_node_ref && color_regions[in_region].type == ColorRegion::TYPE_STRING) {
+						region_color = unique_node_ref_color;
 					}
 					if (in_string_name && color_regions[in_region].type == ColorRegion::TYPE_STRING) {
 						region_color = string_name_color;
@@ -564,11 +568,13 @@ Dictionary GDScriptSyntaxHighlighter::_get_line_syntax_highlighting_impl(int p_l
 			in_node_path = false;
 		}
 
-		if (!in_node_ref && in_region == -1 && (str[j] == '$' || (str[j] == '%' && !is_binary_op))) {
+		if (!in_node_ref && in_region == -1 && str[j] == '$') {
 			in_node_ref = true;
+		} else if (!in_node_ref && in_region == -1 && str[j] == '%' && !is_binary_op) {
+			in_unique_node_ref = true;
 		} else if (in_region != -1 || (is_a_symbol && str[j] != '/' && str[j] != '%') || (is_a_digit && j > 0 && (str[j - 1] == '$' || str[j - 1] == '/' || str[j - 1] == '%'))) {
 			// NodeRefs can't start with digits, so point out wrong syntax immediately.
-			in_node_ref = false;
+			in_node_ref = in_unique_node_ref = false;
 		}
 
 		if (!in_annotation && in_region == -1 && str[j] == '@') {
@@ -582,6 +588,9 @@ Dictionary GDScriptSyntaxHighlighter::_get_line_syntax_highlighting_impl(int p_l
 		} else if (in_node_ref) {
 			next_type = NODE_REF;
 			color = node_ref_color;
+		} else if (in_unique_node_ref) {
+			next_type = NODE_REF;
+			color = unique_node_ref_color;
 		} else if (in_annotation) {
 			next_type = ANNOTATION;
 			color = annotation_color;
@@ -815,6 +824,7 @@ void GDScriptSyntaxHighlighter::_update_cache() {
 		global_function_color = Color(0.64, 0.64, 0.96);
 		node_path_color = Color(0.72, 0.77, 0.49);
 		node_ref_color = Color(0.39, 0.76, 0.35);
+		unique_node_ref_color = Color(0.86, 0.35, 0.94);
 		annotation_color = Color(1.0, 0.7, 0.45);
 		string_name_color = Color(1.0, 0.76, 0.65);
 		comment_marker_colors[COMMENT_MARKER_CRITICAL] = Color(0.77, 0.35, 0.35);
@@ -825,6 +835,7 @@ void GDScriptSyntaxHighlighter::_update_cache() {
 		global_function_color = Color(0.36, 0.18, 0.72);
 		node_path_color = Color(0.18, 0.55, 0);
 		node_ref_color = Color(0.0, 0.5, 0);
+		unique_node_ref_color = Color(0.61, 0.38, 1);
 		annotation_color = Color(0.8, 0.37, 0);
 		string_name_color = Color(0.8, 0.56, 0.45);
 		comment_marker_colors[COMMENT_MARKER_CRITICAL] = Color(0.8, 0.14, 0.14);
@@ -836,6 +847,7 @@ void GDScriptSyntaxHighlighter::_update_cache() {
 	EDITOR_DEF("text_editor/theme/highlighting/gdscript/global_function_color", global_function_color);
 	EDITOR_DEF("text_editor/theme/highlighting/gdscript/node_path_color", node_path_color);
 	EDITOR_DEF("text_editor/theme/highlighting/gdscript/node_reference_color", node_ref_color);
+	EDITOR_DEF("text_editor/theme/highlighting/gdscript/unique_node_reference_color", unique_node_ref_color);
 	EDITOR_DEF("text_editor/theme/highlighting/gdscript/annotation_color", annotation_color);
 	EDITOR_DEF("text_editor/theme/highlighting/gdscript/string_name_color", string_name_color);
 	EDITOR_DEF("text_editor/theme/highlighting/comment_markers/critical_color", comment_marker_colors[COMMENT_MARKER_CRITICAL]);
@@ -864,6 +876,10 @@ void GDScriptSyntaxHighlighter::_update_cache() {
 				node_ref_color,
 				true);
 		EditorSettings::get_singleton()->set_initial_value(
+				"text_editor/theme/highlighting/gdscript/unique_node_reference_color",
+				unique_node_ref_color,
+				true);
+		EditorSettings::get_singleton()->set_initial_value(
 				"text_editor/theme/highlighting/gdscript/annotation_color",
 				annotation_color,
 				true);
@@ -889,6 +905,7 @@ void GDScriptSyntaxHighlighter::_update_cache() {
 	global_function_color = EDITOR_GET("text_editor/theme/highlighting/gdscript/global_function_color");
 	node_path_color = EDITOR_GET("text_editor/theme/highlighting/gdscript/node_path_color");
 	node_ref_color = EDITOR_GET("text_editor/theme/highlighting/gdscript/node_reference_color");
+	unique_node_ref_color = EDITOR_GET("text_editor/theme/highlighting/gdscript/unique_node_reference_color");
 	annotation_color = EDITOR_GET("text_editor/theme/highlighting/gdscript/annotation_color");
 	string_name_color = EDITOR_GET("text_editor/theme/highlighting/gdscript/string_name_color");
 	type_color = EDITOR_GET("text_editor/theme/highlighting/base_type_color");

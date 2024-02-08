@@ -90,6 +90,7 @@ private:
 	Color string_color;
 	Color node_path_color;
 	Color node_ref_color;
+	Color unique_node_ref_color;
 	Color annotation_color;
 	Color string_name_color;
 	Color type_color;
