@@ -954,7 +954,14 @@ String ResourceLoader::_path_remap(const String &p_path, bool *r_translation_rem
 	} else {
 		// Try file remap.
 		Error err;
-		Ref<FileAccess> f = FileAccess::open(new_path + ".remap", FileAccess::READ, &err);
+		Ref<FileAccess> f;
+
+		if (new_path.ends_with(".remap")) {
+			f = FileAccess::open(new_path, FileAccess::READ, &err);
+		} else {
+			f = FileAccess::open(new_path + ".remap", FileAccess::READ, &err);
+		}
+
 		if (f.is_valid()) {
 			VariantParser::StreamFile stream;
 			stream.f = f;

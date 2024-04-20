@@ -35,13 +35,21 @@
 #include "core/os/os.h"
 #include "core/variant/variant_parser.h"
 
+Ref<FileAccess> _open_file(const String &p_path, Error *err) {
+	String search_path = p_path;
+	if (!p_path.ends_with(".import")) {
+		search_path = search_path + ".import";
+	}
+	return FileAccess::open(search_path, FileAccess::READ, err);
+}
+
 bool ResourceFormatImporter::SortImporterByName::operator()(const Ref<ResourceImporter> &p_a, const Ref<ResourceImporter> &p_b) const {
 	return p_a->get_importer_name() < p_b->get_importer_name();
 }
 
 Error ResourceFormatImporter::_get_path_and_type(const String &p_path, PathAndType &r_path_and_type, bool *r_valid) const {
 	Error err;
-	Ref<FileAccess> f = FileAccess::open(p_path + ".import", FileAccess::READ, &err);
+	Ref<FileAccess> f = _open_file(p_path, &err);
 
 	if (f.is_null()) {
 		if (r_valid) {
@@ -193,11 +201,15 @@ void ResourceFormatImporter::get_recognized_extensions_for_type(const String &p_
 }
 
 bool ResourceFormatImporter::exists(const String &p_path) const {
-	return FileAccess::exists(p_path + ".import");
+	if (p_path.ends_with(".import")) {
+		return FileAccess::exists(p_path);
+	} else {
+		return FileAccess::exists(p_path + ".import");
+	}
 }
 
 bool ResourceFormatImporter::recognize_path(const String &p_path, const String &p_for_type) const {
-	return FileAccess::exists(p_path + ".import");
+	return exists(p_path);
 }
 
 Error ResourceFormatImporter::get_import_order_threads_and_importer(const String &p_path, int &r_order, bool &r_can_threads, String &r_importer) const {
@@ -207,7 +219,7 @@ Error ResourceFormatImporter::get_import_order_threads_and_importer(const String
 	r_can_threads = false;
 	Ref<ResourceImporter> importer;
 
-	if (FileAccess::exists(p_path + ".import")) {
+	if (exists(p_path)) {
 		PathAndType pat;
 		Error err = _get_path_and_type(p_path, pat);
 
@@ -231,7 +243,7 @@ Error ResourceFormatImporter::get_import_order_threads_and_importer(const String
 int ResourceFormatImporter::get_import_order(const String &p_path) const {
 	Ref<ResourceImporter> importer;
 
-	if (FileAccess::exists(p_path + ".import")) {
+	if (exists(p_path)) {
 		PathAndType pat;
 		Error err = _get_path_and_type(p_path, pat);
 
@@ -276,7 +288,7 @@ String ResourceFormatImporter::get_internal_resource_path(const String &p_path) 
 
 void ResourceFormatImporter::get_internal_resource_path_list(const String &p_path, List<String> *r_paths) {
 	Error err;
-	Ref<FileAccess> f = FileAccess::open(p_path + ".import", FileAccess::READ, &err);
+	Ref<FileAccess> f = _open_file(p_path, &err);
 
 	if (f.is_null()) {
 		return;
