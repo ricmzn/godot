@@ -316,7 +316,7 @@ void Viewport::_sub_window_update(Window *p_window) {
 	Transform2D pos;
 	pos.set_origin(p_window->get_position());
 	RS::get_singleton()->canvas_item_clear(sw.canvas_item);
-	Rect2i r = Rect2i(p_window->get_position(), sw.window->get_size());
+	Rect2 r = Rect2(p_window->get_position(), Size2(sw.window->get_size()) / stretch_transform.get_scale());
 
 	if (!p_window->get_flag(Window::FLAG_BORDERLESS)) {
 		Ref<StyleBox> panel = gui.subwindow_focused == p_window ? p_window->theme_cache.embedded_border : p_window->theme_cache.embedded_unfocused_border;
@@ -961,9 +961,9 @@ void Viewport::update_canvas_items() {
 	_update_canvas_items(this);
 }
 
-void Viewport::_set_size(const Size2i &p_size, const Size2i &p_size_2d_override, bool p_allocated) {
+void Viewport::_set_size(const Size2i &p_size, const Size2i &p_size_2d_override, bool p_size_2d_override_stretch, bool p_allocated) {
 	Transform2D stretch_transform_new = Transform2D();
-	if (is_size_2d_override_stretch_enabled() && p_size_2d_override.width > 0 && p_size_2d_override.height > 0) {
+	if (p_size_2d_override_stretch && p_size_2d_override.width > 0 && p_size_2d_override.height > 0) {
 		Size2 scale = Size2(p_size) / Size2(p_size_2d_override);
 		stretch_transform_new.scale(scale);
 	}
@@ -4883,17 +4883,17 @@ Viewport::~Viewport() {
 
 void SubViewport::set_size(const Size2i &p_size) {
 	ERR_MAIN_THREAD_GUARD;
-	_internal_set_size(p_size);
+	_internal_set_size(p_size, _get_size_2d_override(), false);
 }
 
-void SubViewport::set_size_force(const Size2i &p_size) {
+void SubViewport::set_size_force(const Size2i &p_size, const Size2i &p_size_2d_override) {
 	ERR_MAIN_THREAD_GUARD;
 	// Use only for setting the size from the parent SubViewportContainer with enabled stretch mode.
 	// Don't expose function to scripting.
-	_internal_set_size(p_size, true);
+	_internal_set_size(p_size, p_size_2d_override, true);
 }
 
-void SubViewport::_internal_set_size(const Size2i &p_size, bool p_force) {
+void SubViewport::_internal_set_size(const Size2i &p_size, const Size2i &p_size_2d_override, bool p_force) {
 	SubViewportContainer *c = Object::cast_to<SubViewportContainer>(get_parent());
 	if (!p_force && c && c->is_stretch_enabled()) {
 #ifdef DEBUG_ENABLED
@@ -4902,7 +4902,9 @@ void SubViewport::_internal_set_size(const Size2i &p_size, bool p_force) {
 		return;
 	}
 
-	_set_size(p_size, _get_size_2d_override(), true);
+	bool override_stretch = p_force || is_size_2d_override_stretch_enabled();
+
+	_set_size(p_size, p_size_2d_override, override_stretch, true);
 
 	if (c) {
 		c->update_minimum_size();
@@ -4916,7 +4918,7 @@ Size2i SubViewport::get_size() const {
 
 void SubViewport::set_size_2d_override(const Size2i &p_size) {
 	ERR_MAIN_THREAD_GUARD;
-	_set_size(_get_size(), p_size, true);
+	_set_size(_get_size(), p_size, is_size_2d_override_stretch_enabled(), true);
 }
 
 Size2i SubViewport::get_size_2d_override() const {
@@ -4931,7 +4933,7 @@ void SubViewport::set_size_2d_override_stretch(bool p_enable) {
 	}
 
 	size_2d_override_stretch = p_enable;
-	_set_size(_get_size(), _get_size_2d_override(), true);
+	_set_size(_get_size(), _get_size_2d_override(), p_enable, true);
 }
 
 bool SubViewport::is_size_2d_override_stretch_enabled() const {
