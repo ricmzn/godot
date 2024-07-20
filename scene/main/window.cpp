@@ -1190,6 +1190,8 @@ void Window::_update_viewport_size() {
 			offset.y = Math::round(margin.y * viewport_size.x / screen_size.x);
 		}
 
+		canvas_item_scale = Size2(1, 1);
+
 		switch (content_scale_mode) {
 			case CONTENT_SCALE_MODE_DISABLED: {
 				// Already handled above
@@ -1200,6 +1202,7 @@ void Window::_update_viewport_size() {
 				final_size_override = viewport_size / content_scale_factor;
 				attach_to_screen_rect = Rect2(margin, screen_size);
 				font_oversampling = (screen_size.x / viewport_size.x) * content_scale_factor;
+				canvas_item_scale = Size2(screen_size.x / viewport_size.x, screen_size.y / viewport_size.y);
 
 				window_transform.translate_local(margin);
 			} break;
@@ -2895,6 +2898,8 @@ void Window::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_content_scale_stretch", "stretch"), &Window::set_content_scale_stretch);
 	ClassDB::bind_method(D_METHOD("get_content_scale_stretch"), &Window::get_content_scale_stretch);
 
+	ClassDB::bind_method(D_METHOD("get_canvas_item_scale"), &Window::get_canvas_item_scale);
+
 	ClassDB::bind_method(D_METHOD("set_keep_title_visible", "title_visible"), &Window::set_keep_title_visible);
 	ClassDB::bind_method(D_METHOD("get_keep_title_visible"), &Window::get_keep_title_visible);
 
@@ -3020,6 +3025,7 @@ void Window::_bind_methods() {
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "content_scale_aspect", PROPERTY_HINT_ENUM, "Ignore,Keep,Keep Width,Keep Height,Expand"), "set_content_scale_aspect", "get_content_scale_aspect");
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "content_scale_stretch", PROPERTY_HINT_ENUM, "Fractional,Integer"), "set_content_scale_stretch", "get_content_scale_stretch");
 	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "content_scale_factor", PROPERTY_HINT_RANGE, "0.5,8.0,0.01"), "set_content_scale_factor", "get_content_scale_factor");
+	ADD_PROPERTY(PropertyInfo(Variant::VECTOR2I, "canvas_item_scale"), "", "get_canvas_item_scale");
 
 #ifndef DISABLE_DEPRECATED
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "auto_translate", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NO_EDITOR), "set_auto_translate", "is_auto_translating");
