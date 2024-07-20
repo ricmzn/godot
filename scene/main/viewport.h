@@ -476,7 +476,7 @@ private:
 	void _propagate_world_2d_changed(Node *p_node);
 
 protected:
-	bool _set_size(const Size2i &p_size, const Size2i &p_size_2d_override, bool p_allocated);
+	bool _set_size(const Size2i &p_size, const Size2i &p_size_2d_override, bool p_size_2d_override_stretch, bool p_allocated);
 
 	Size2i _get_size() const;
 	Size2i _get_size_2d_override() const;
@@ -813,7 +813,7 @@ private:
 	ClearMode clear_mode = CLEAR_MODE_ALWAYS;
 	bool size_2d_override_stretch = false;
 
-	void _internal_set_size(const Size2i &p_size, bool p_force = false);
+	void _internal_set_size(const Size2i &p_size, const Size2i &p_size_2d_override, bool p_force);
 
 protected:
 	static void _bind_methods();
@@ -823,7 +823,7 @@ protected:
 public:
 	void set_size(const Size2i &p_size);
 	Size2i get_size() const;
-	void set_size_force(const Size2i &p_size);
+	void set_size_force(const Size2i &p_size, const Size2i &p_size_2d_override);
 
 	void set_size_2d_override(const Size2i &p_size);
 	Size2i get_size_2d_override() const;

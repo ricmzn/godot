@@ -31,7 +31,7 @@
 #include "subviewport_container.h"
 
 #include "core/config/engine.h"
-#include "scene/main/viewport.h"
+#include "scene/main/window.h"
 
 Size2 SubViewportContainer::get_minimum_size() const {
 	if (stretch) {
@@ -84,14 +84,22 @@ void SubViewportContainer::recalc_force_viewport_sizes() {
 		return;
 	}
 
-	// If stretch is enabled, make sure that all child SubViwewports have the correct size.
+	Size2 canvas_item_scale = Size2(1, 1);
+	Window *parent_window = get_window();
+
+	if (parent_window) {
+		canvas_item_scale = parent_window->get_canvas_item_scale();
+	}
+
+	// If stretch is enabled, make sure that all child SubViewports have the correct size.
 	for (int i = 0; i < get_child_count(); i++) {
 		SubViewport *c = Object::cast_to<SubViewport>(get_child(i));
 		if (!c) {
 			continue;
 		}
 
-		c->set_size_force(get_size() / shrink);
+		Size2 viewport_size = (get_size() * canvas_item_scale) / shrink;
+		c->set_size_force(viewport_size, get_size());
 	}
 }
 
