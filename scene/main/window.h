@@ -146,6 +146,7 @@ private:
 	ContentScaleAspect content_scale_aspect = CONTENT_SCALE_ASPECT_IGNORE;
 	ContentScaleStretch content_scale_stretch = CONTENT_SCALE_STRETCH_FRACTIONAL;
 	real_t content_scale_factor = 1.0;
+	Size2 canvas_item_scale = Size2(1, 1);
 
 	void _make_window();
 	void _clear_window();
@@ -337,6 +338,8 @@ public:
 
 	void set_content_scale_stretch(ContentScaleStretch p_stretch);
 	ContentScaleStretch get_content_scale_stretch() const;
+
+	Size2 get_canvas_item_scale() const { return canvas_item_scale; };
 
 	void set_keep_title_visible(bool p_title_visible);
 	bool get_keep_title_visible() const;

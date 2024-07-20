@@ -563,6 +563,9 @@
 		<member name="borderless" type="bool" setter="set_flag" getter="get_flag" default="false">
 			If [code]true[/code], the window will have no borders.
 		</member>
+		<member name="canvas_item_scale" type="Vector2" setter="" getter="get_canvas_item_scale" default="Vector2(1, 1)">
+			When [member content_scale_stretch] is set to [constant CONTENT_SCALE_MODE_CANVAS_ITEMS], this is the scale factor applied to the size of all canvas items and embedded windows inside of this window. In other stretch modes, this is always [code]Vector2(1, 1)[/code].
+		</member>
 		<member name="content_scale_aspect" type="int" setter="set_content_scale_aspect" getter="get_content_scale_aspect" enum="Window.ContentScaleAspect" default="0">
 			Specifies how the content's aspect behaves when the [Window] is resized. The base aspect is determined by [member content_scale_size].
 		</member>
@@ -576,7 +579,7 @@
 			Base size of the content (i.e. nodes that are drawn inside the window). If non-zero, [Window]'s content will be scaled when the window is resized to a different size.
 		</member>
 		<member name="content_scale_stretch" type="int" setter="set_content_scale_stretch" getter="get_content_scale_stretch" enum="Window.ContentScaleStretch" default="0">
-			The policy to use to determine the final scale factor for 2D elements. This affects how [member content_scale_factor] is applied, in addition to the automatic scale factor determined by [member content_scale_size].
+			The policy to use to determine the final scale factor for 2D elements. This affects how [member content_scale_factor] is applied, in addition to the automatic scale factor determined by [member content_scale_size]. Also affects [member canvas_item_scale].
 		</member>
 		<member name="current_screen" type="int" setter="set_current_screen" getter="get_current_screen">
 			The screen the window is currently on.
