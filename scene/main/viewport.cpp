@@ -1139,7 +1139,7 @@ void Viewport::set_canvas_transform(const Transform2D &p_transform) {
 
 Transform2D Viewport::get_canvas_transform() const {
 	ERR_READ_THREAD_GUARD_V(Transform2D());
-	return canvas_transform;
+	return stretch_transform.affine_inverse() * canvas_transform;
 }
 
 void Viewport::_update_global_transform() {
